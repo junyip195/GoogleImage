@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -17,6 +18,7 @@ namespace WindowsFormsApp1
         {
             InitializeComponent();
         }
+        System.Drawing.Image image = null;
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -69,11 +71,46 @@ namespace WindowsFormsApp1
                             //load an image from that stream.
                             pictureBox1.Image = Image.FromStream(ms);
                         }
-
+                        System.Drawing.Image image = DownloadImageFromUrl(imgList.First().Attributes["src"].Value);
+                        Console.WriteLine(imgList.First().Attributes["src"].Value);
                     }
 
                 }
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+            string rootPath = @"C:\DownloadedImageFromUrl";
+            string fileName = System.IO.Path.Combine(rootPath, textBox1.Text + ".jpeg");
+            image.Save(fileName);
+        }
+
+        public System.Drawing.Image DownloadImageFromUrl(string imageUrl)
+        {
+
+
+            try
+            {
+                System.Net.HttpWebRequest webRequest = (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(imageUrl);
+                webRequest.AllowWriteStreamBuffering = true;
+                webRequest.Timeout = 30000;
+
+                System.Net.WebResponse webResponse = webRequest.GetResponse();
+
+                System.IO.Stream stream = webResponse.GetResponseStream();
+
+                image = System.Drawing.Image.FromStream(stream);
+
+                webResponse.Close();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+            return image;
         }
     }
 }
